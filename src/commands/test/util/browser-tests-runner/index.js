@@ -77,7 +77,7 @@ function startServer(tests, options, devTools) {
                 virtualModule: {
                     createReadStream: function() {
                         var rendererPath = test.renderer;
-                        var testDir = path.dirname(test.file);
+                        var testDir = path.dirname(file);
                         var relativePath = path.relative(testDir, rendererPath);
                         if (relativePath.charAt(0) !== '.') {
                             relativePath = './' + relativePath;
@@ -107,13 +107,22 @@ function startServer(tests, options, devTools) {
         var browserDependencies = [
             "mocha/mocha.js",
             "mocha/mocha.css",
-            "require-run: " + require.resolve('./setup'),
+            "require-run: " + require.resolve('./setup')
+        ];
+
+        var configDependencies = devTools.config.dependencies;
+        if (configDependencies) {
+            // push config dependencies into browserDependencies (if any);
+            browserDependencies = browserDependencies.concat(configDependencies);
+        }
+
+        browserDependencies = browserDependencies.concat([
             testDependencies,
             {
                 "require-run": require.resolve('./mocha-run'),
                 "slot": "mocha-run"
             }
-        ];
+        ]);
 
         var markoWidgetsPath = resolveFrom(devTools.cwd, 'marko-widgets');
 
