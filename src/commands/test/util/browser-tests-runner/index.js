@@ -14,6 +14,7 @@ var mochaPhantomJSBin = require.resolve('mocha-phantomjs-core');
 var phantomjsBinPath = require('phantomjs-prebuilt').path;
 var resolveFrom = require('resolve-from');
 var shouldCover = !!process.env.NYC_CONFIG;
+var parseRequire = require('lasso-require/src/util/parseRequire');
 
 class WrapStream extends Transform {
     constructor(prefix, suffix) {
@@ -111,18 +112,33 @@ function startServer(tests, options, devTools) {
         ];
 
         var configDependencies = devTools.config.dependencies;
+
+
         if (configDependencies) {
-            // push config dependencies into browserDependencies (if any);
-            browserDependencies = browserDependencies.concat(configDependencies);
+            // allow dependencies to be required relative to the working directory
+            configDependencies.forEach((dependency) => {
+                var parsedDependency = parseRequire(dependency);
+                var type = parsedDependency.type;
+                var path = resolveFrom(devTools.cwd, parsedDependency.path);
+
+                if (type) {
+                    dependency = type + ': ' + path;
+                } else {
+                    dependency = path;
+                }
+                browserDependencies.push(dependency);
+            });
         }
 
-        browserDependencies = browserDependencies.concat([
-            testDependencies,
-            {
+        // push test dependencies
+        browserDependencies.push(testDependencies);
+
+        if (devTools.config.autoRunTests) {
+            browserDependencies.push({
                 "require-run": require.resolve('./mocha-run'),
                 "slot": "mocha-run"
-            }
-        ]);
+            });
+        }
 
         var markoWidgetsPath = resolveFrom(devTools.cwd, 'marko-widgets');
 
