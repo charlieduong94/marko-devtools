@@ -117,14 +117,18 @@ function startServer(tests, options, devTools) {
         if (configDependencies) {
             // allow dependencies to be required relative to the working directory
             configDependencies.forEach((dependency) => {
-                var parsedDependency = parseRequire(dependency);
-                var type = parsedDependency.type;
-                var path = resolveFrom(devTools.cwd, parsedDependency.path);
+                if ((typeof dependency === 'string') || (dependency instanceof String)) {
+                    var parsedDependency = parseRequire(dependency);
+                    var type = parsedDependency.type;
+                    var path = resolveFrom(devTools.cwd, parsedDependency.path);
 
-                if (type) {
-                    dependency = type + ': ' + path;
-                } else {
-                    dependency = path;
+                    if (type) {
+                        dependency = type + ': ' + path;
+                    } else {
+                        dependency = path;
+                    }
+                } else if ((path = dependency.path)) {
+                    dependency.path = resolveFrom(devTools.cwd, path);
                 }
                 browserDependencies.push(dependency);
             });
