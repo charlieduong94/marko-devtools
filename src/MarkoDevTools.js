@@ -14,7 +14,9 @@ class MarkoDevTools extends EventEmitter {
         this._rootPackage = lassoPackageRoot.getRootPackage(this.cwd);
         this._commands = undefined;
         this.config = {
-            workDir: path.join(this.packageRoot, '.marko-devtools')
+            workDir: path.join(this.packageRoot, '.marko-devtools'),
+            // option to start the tests automatically after dependencies are loaded in
+            autoRunTests: true
         };
 
         this._loadPackagePlugin();

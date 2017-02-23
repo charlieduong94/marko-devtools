@@ -146,13 +146,14 @@ function startServer(tests, options, devTools) {
             }
         }
 
-        browserDependencies = browserDependencies.concat([
-            testDependencies,
-            {
+        browserDependencies.push(testDependencies);
+
+        if (devTools.config.autoRunTests) {
+            browserDependencies.push({
                 "require-run": require.resolve('./mocha-run'),
                 "slot": "mocha-run"
-            }
-        ]);
+            });
+        }
 
         var markoWidgetsPath = resolveFrom(devTools.cwd, 'marko-widgets');
 
